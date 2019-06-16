@@ -2,6 +2,7 @@ import trio
 import os
 from itertools import count
 from dotenv import load_dotenv
+import pickle
 
 
 load_dotenv()
@@ -17,21 +18,23 @@ BUFSIZE = 16384
 CONNECTION_COUNTER = count()
 
 
-async def echo_server(server_stream):
+async def p2p_server(server_stream):
     # Assign each connection a unique number to make our debug prints easier
     # to understand when there are multiple simultaneous connections.
     ident = next(CONNECTION_COUNTER)
-    print("echo_server {}: started".format(ident))
+    print("Server {}: started".format(ident))
     try:
         while True:
             data = await server_stream.receive_some(BUFSIZE)
-            print("echo_server {}: received data {!r}".format(ident, data))
+            print("Server {}: received data {!r}".format(ident, data))
             if not data:
-                print("echo_server {}: connection closed".format(ident))
+                print("Server {}: connection closed".format(ident))
                 return
-            print("echo_server {}: sending data {!r}".format(ident, data))
+            print("Server {}: sending data {!r}".format(ident, data))
             await trio.sleep(3)
+
             await server_stream.send_all(data)
+            # send_all(data)
     # FIXME: add discussion of MultiErrors to the tutorial, and use
     # MultiError.catch here. (Not important in this case, but important if the
     # server code uses nurseries internally.)
@@ -39,11 +42,11 @@ async def echo_server(server_stream):
         # Unhandled exceptions will propagate into our parent and take
         # down the whole program. If the exception is KeyboardInterrupt,
         # that's what we want, but otherwise maybe not...
-        print("echo_server {}: crashed: {!r}".format(ident, exc))
+        print("Server {}: crashed: {!r}".format(ident, exc))
 
 
 async def main():
-    await trio.serve_tcp(echo_server, server_port)
+    await trio.serve_tcp(p2p_server, server_port)
 
 
 # We could also just write 'trio.run(serve_tcp, echo_server, PORT)', but real

@@ -109,8 +109,13 @@ async def receiver(client_stream):
 
 
 async def parent():
+    # TODO: check data types
+    # 1. User enters some default parameters
 
-    # Some useful instructions for the user
+    # 2. The entered key is stored in a file
+    server_id = "{}:{}".format(dest_server_host, dest_server_port)
+
+    # 3. Some useful instructions for the user
     print("Hi, sender!!\n"
           "Type 'key-exchange' for sending your symmetric key using Diffie-Hellman \n"
           "Type 'aes-encrypt' and enter for encryption \n"
@@ -122,7 +127,7 @@ async def parent():
 
     async with client_stream:
         async with trio.open_nursery() as nursery:
-            # Sender and receiver async tasks will be started
+            # 4. Sender and receiver async tasks will be started
             print("Spawning sender...")
             nursery.start_soon(sender, client_stream)
 
