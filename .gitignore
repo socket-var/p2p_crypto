@@ -1,4 +1,5 @@
-peer_b
+receiver_key.pickle
+own_key.pickle
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
