@@ -26,10 +26,13 @@ self_client_host = os.getenv(
 self_client_port = int(os.getenv(
     "DESTINATION_SERVER_PORT"))
 
-sender_key_file_name = os.getenv(
-    "SENDER_KEY_FILE_NAME")
+owner_key_file_name = os.getenv(
+    "OWNER_KEY_FILE_NAME")
 
 receiver_key_file_name = os.getenv(
+    "RECEIVER_KEY_FILE_NAME")
+
+decryption_file_name = os.getenv(
     "RECEIVER_KEY_FILE_NAME")
 
 server_id = "{}:{}".format(dest_server_host, dest_server_port)
@@ -61,7 +64,7 @@ async def start_kx(client_stream, command):
     data = (dest_address, command,
             public_modulus, public_base, encrypted_key)
 
-    with open(sender_key_file_name, "wb") as write_obj:
+    with open(owner_key_file_name, "wb") as write_obj:
         pickle.dump(data, write_obj)
 
 
@@ -95,6 +98,65 @@ async def reply_kx(client_stream, command):
     return await client_stream.send_all(pickle.dumps(data))
 
 
+async def caesar_encrypt(client_stream, command):
+    my_message = input("Enter the message to encrypt and send: ")
+    # TODO: use private key from file
+    private_key = int(input("Enter your private key:"))
+    filename = input("Enter the file name containing encrypted key:")
+    dest_address = input("Enter the destination address (Eg: 'localhost:5000'): ")
+    alphabet = "abcdefghijklmnopqrstuvwxyz"
+
+    with open(filename, 'rb') as pickle_file:
+        data = pickle.load(pickle_file)    
+
+    print(data)
+    # private_key * cipher_key
+    key = private_key * data[4]
+    
+    new_key = shift_alphabet(alphabet, key)
+    print(new_key)
+
+    encrypted_text = encrypt_caesar(my_message, new_key)
+
+    result = (dest_address, command, encrypted_text)
+    print("Sending encrypted text: {}.....".format(encrypted_text))
+    return await client_stream.send_all(pickle.dumps(result))
+
+def caesar_decrypt(client_stream, command):
+    private_key = int(input("Enter your private key:"))
+    filename = input("Enter the file name containing encrypted text: ")
+    key_filename = input("Enter the file name containing encrypted key: ")
+
+    encrypted_text = ""
+    # read encrypted text
+    with open(filename, 'rb') as encrypt_file_obj:
+        data = pickle.load(encrypt_file_obj)
+        encrypted_text = data[2]
+    
+    # form new_key
+
+    # private_key * encrypted_key
+    key = -(private_key * data[4])
+    
+    new_key = shift_alphabet(alphabet, key)
+    print(new_key)
+    
+    new_key = ""
+    
+    with open(key_filename, 'rb') as key_file_obj:
+        new_key = pickle.load(key_file_obj)
+    # TODO: remove hard-coding
+    print(new_key)
+    
+    
+    # decrypt it
+    decrypted_text = decrypt_caesar(encrypted_text, new_key)
+    print(decrypted_text)
+
+    with open(decryption_file_name, 'wb') as decrypt_file_obj:
+        pickle.dump(decrypted_text, decrypt_file_obj)
+
+
 async def sender(client_stream):
     print("sender started")
     while True:
@@ -108,7 +170,10 @@ async def sender(client_stream):
             await start_kx(client_stream, command)
         elif command == "reply-kx":
             await reply_kx(client_stream, command)
-            
+        elif command == "caesar-encrypt":
+            await caesar_encrypt(client_stream, command)
+        elif command == "caesar-decrypt":
+            caesar_decrypt(client_stream, command)
         # refreshes the screen to show any updates
         elif command == "refresh":
             print("Refreshing...Please wait...")
@@ -135,8 +200,8 @@ async def parent():
     print("Hi, sender!!\n"
         "Type 'start-kx' for sending your symmetric key using Diffie-Hellman \n"
         "Type 'reply-kx' for sending your symmetric key using Diffie-Hellman \n"
-        "Type 'aes-encrypt' and enter for encryption \n"
-        "Type 'aes-decrypt' and enter for decryption \n"
+        "Type 'caesar-encrypt' and enter for encryption \n"
+        "Type 'caesar-decrypt' and enter for decryption \n"
         "Type 'refresh' to refresh the page \n")
 
     print("Connecting to {}:{}".format(dest_server_host, dest_server_port))

@@ -26,6 +26,11 @@ owner_key_file_name = os.getenv(
 receiver_key_file_name = os.getenv(
     "RECEIVER_KEY_FILE_NAME")
 
+
+encryption_file_name = os.getenv(
+    "ENCRYPTION_FILE_NAME"
+)
+
 BUFSIZE = 16384
 
 CONNECTION_COUNTER = count()
@@ -43,6 +48,9 @@ def receiver(server_stream, data):
         
     elif command == "reply-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
         filename = owner_key_file_name
+    elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+        print("dumping caesar encrypted text")
+        filename = encryption_file_name
     
     with open(filename, 'wb') as pickle_file:
         pickle.dump(pickle.loads(data), pickle_file)
