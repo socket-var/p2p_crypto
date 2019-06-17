@@ -13,9 +13,39 @@ server_host = os.getenv(
 server_port = int(os.getenv(
     "SELF_SERVER_PORT"))
 
+self_client_host = os.getenv(
+    "SELF_CLIENT_ADDRESS")
+
+self_client_port = int(os.getenv(
+    "SELF_CLIENT_PORT"))
+
+
+owner_key_file_name = os.getenv(
+    "OWNER_KEY_FILE_NAME")
+
+receiver_key_file_name = os.getenv(
+    "RECEIVER_KEY_FILE_NAME")
+
 BUFSIZE = 16384
 
 CONNECTION_COUNTER = count()
+
+def receiver(server_stream, data):
+
+    dest_address, command, _, _, _ = pickle.loads(data)
+
+    print(dest_address, "{}:{}".format(self_client_host, self_client_port), command)
+    
+    filename = ""
+
+    if command == "start-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+        filename = receiver_key_file_name
+        
+    elif command == "reply-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+        filename = owner_key_file_name
+    
+    with open(filename, 'wb') as pickle_file:
+        pickle.dump(pickle.loads(data), pickle_file)
 
 
 async def p2p_server(server_stream):
@@ -27,13 +57,13 @@ async def p2p_server(server_stream):
         while True:
             data = await server_stream.receive_some(BUFSIZE)
             print("Server {}: received data {!r}".format(ident, data))
+            
+            receiver(server_stream, data)
+            
             if not data:
                 print("Server {}: connection closed".format(ident))
                 return
-            print("Server {}: sending data {!r}".format(ident, data))
-            await trio.sleep(3)
 
-            await server_stream.send_all(data)
             # send_all(data)
     # FIXME: add discussion of MultiErrors to the tutorial, and use
     # MultiError.catch here. (Not important in this case, but important if the
