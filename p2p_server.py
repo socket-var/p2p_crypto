@@ -31,13 +31,17 @@ encryption_file_name = os.getenv(
     "ENCRYPTION_FILE_NAME"
 )
 
+decryption_file_name = os.getenv(
+    "DECRYPTION_FILE_NAME"
+)
+
 BUFSIZE = 16384
 
 CONNECTION_COUNTER = count()
 
 def receiver(server_stream, data):
-
-    dest_address, command, _, _, _ = pickle.loads(data)
+    data = pickle.loads(data)
+    dest_address, command = data[0], data[1]
 
     print(dest_address, "{}:{}".format(self_client_host, self_client_port), command)
     
@@ -51,9 +55,11 @@ def receiver(server_stream, data):
     elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
         print("dumping caesar encrypted text")
         filename = encryption_file_name
+    elif command == "caesar-decrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+        filename = decryption_file_name
     
     with open(filename, 'wb') as pickle_file:
-        pickle.dump(pickle.loads(data), pickle_file)
+        pickle.dump(data, pickle_file)
 
 
 async def p2p_server(server_stream):

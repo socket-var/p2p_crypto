@@ -111,7 +111,7 @@ async def caesar_encrypt(client_stream, command):
 
     print(data)
     # private_key * cipher_key
-    key = private_key * data[4]
+    key = (private_key * data[4]) % 26
     
     new_key = shift_alphabet(alphabet, key)
     print(new_key)
@@ -135,19 +135,19 @@ def caesar_decrypt(client_stream, command):
     
     # form new_key
 
-    # private_key * encrypted_key
-    key = -(private_key * data[4])
-    
-    new_key = shift_alphabet(alphabet, key)
-    print(new_key)
-    
     new_key = ""
     
     with open(key_filename, 'rb') as key_file_obj:
         new_key = pickle.load(key_file_obj)
     # TODO: remove hard-coding
     print(new_key)
+
+
+    # private_key * encrypted_key
+    key = -(private_key * new_key[4]) % 26
     
+    new_key = shift_alphabet(alphabet, key)
+    print(new_key)
     
     # decrypt it
     decrypted_text = decrypt_caesar(encrypted_text, new_key)
@@ -179,19 +179,6 @@ async def sender(client_stream):
             print("Refreshing...Please wait...")
             await trio.sleep(5)
 
-
-async def receiver(client_stream):
-    print("receiver: started!")
-    while True:
-        data = await client_stream.receive_some(BUFSIZE)
-
-        print("receiver: got data {!r}".format(data))
-
-        # if command == "start-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
-        #     with open(store_file_name, 'wb') as pickle_file:
-        #         pickle.dump(data, pickle_file)
-        # else:
-        #     print("default")
 
 
 async def parent():
