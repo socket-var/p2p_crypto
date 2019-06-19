@@ -77,7 +77,6 @@ def caesar_encrypt():
     my_message = input("Enter the message to encrypt and send: ")
     private_key = int(input("Enter your private key:"))
     filename = input("Enter the file name containing encrypted key:")
-    dest_address = input("Enter the destination address (Eg: 'localhost:5000'): ")
     alphabet = "abcdefghijklmnopqrstuvwxyz"
 
     with open(filename, 'rb') as pickle_file:
@@ -85,7 +84,7 @@ def caesar_encrypt():
 
     print(data)
     # private_key * cipher_key
-    key = (private_key * data["encrypted_key"]) % 26
+    key = ((data["encrypted_key"] ** private_key) % data["public_modulus"]) % 26
     
     new_key = shift_alphabet(alphabet, key)
     print(new_key)
@@ -93,12 +92,12 @@ def caesar_encrypt():
     encrypted_text = encrypt_caesar(my_message, new_key)
 
     result = {
-        "from": get_url(self_client_host, self_client_port), 
-        "to": get_url(dest_client_host, dest_client_port), 
-        "command": caesar-encrypt", 
+        "from_address": get_url(self_client_host, self_client_port), 
+        "to_address": get_url(dest_client_host, dest_client_port), 
+        "command": "caesar-encrypt", 
         "encrypted_text": encrypted_text
     }
-    
+    print(result)
     print("Sending encrypted text: {}.....".format(encrypted_text))
     return pickle.dumps(result)
 
@@ -118,12 +117,14 @@ def caesar_decrypt():
     
     with open(key_filename, 'rb') as key_file_obj:
         new_key = pickle.load(key_file_obj)
-    # TODO: remove hard-coding
+    
     print(new_key)
 
 
     # private_key * encrypted_key
-    key = -(private_key * new_key["encrypted_key"]) % 26
+    key = (new_key["encrypted_key"] ** private_key) % data["public_modulus"]
+    key = -key
+    print(key)
     
     new_key = shift_alphabet(alphabet, key)
     print(new_key)
