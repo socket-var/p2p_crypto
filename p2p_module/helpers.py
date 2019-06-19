@@ -12,7 +12,6 @@ def start_kx():
     private_key = int(input("Enter private key for Diffie-Hellman: "))
     public_modulus = int(input("Enter the public modulus: "))
     public_base = int(input("Enter the public base: "))
-    dest_address = input("Enter the destination address (Eg: 'localhost:5000'): ")
 
     # destination client to receive the secret
 
@@ -20,12 +19,10 @@ def start_kx():
 
     print(
         "sender: sending encrypted key to {} using {!r} {!r} {!r} {!r}".format(
-            dest_address, "start-kx", public_modulus, public_base, encrypted_key
+            get_url(dest_client_host, dest_client_port), "start-kx", public_modulus, public_base, encrypted_key
         )
     )
 
-    # data = (dest_address, "start-kx",
-    #         public_modulus, public_base, encrypted_key)
     data = {
         "from_address": get_url(self_client_host, self_client_port),
         "to_address": get_url(dest_client_host, dest_client_port),

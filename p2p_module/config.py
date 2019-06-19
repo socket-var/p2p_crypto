@@ -10,10 +10,10 @@ dest_server_port = int(os.getenv(
     "DESTINATION_SERVER_PORT"))
 
 dest_client_host = os.getenv(
-    "DESTINATION_SERVER_ADDRESS")
+    "DESTINATION_CLIENT_ADDRESS")
 
 dest_client_port = int(os.getenv(
-    "DESTINATION_SERVER_PORT"))
+    "DESTINATION_CLIENT_PORT"))
 
 self_server_host = os.getenv(
     "SELF_SERVER_ADDRESS")
@@ -22,10 +22,10 @@ self_server_port = int(os.getenv(
     "SELF_SERVER_PORT"))
 
 self_client_host = os.getenv(
-    "DESTINATION_SERVER_ADDRESS")
+    "SELF_CLIENT_ADDRESS")
 
 self_client_port = int(os.getenv(
-    "DESTINATION_SERVER_PORT"))
+    "SELF_CLIENT_PORT"))
 
 owner_key_file_name = os.getenv(
     "OWNER_KEY_FILE_NAME")
