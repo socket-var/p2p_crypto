@@ -64,6 +64,7 @@ def reply_kx():
     data = {
         "from_address": src_address,
         "to_address": dest_address,
+        "command": "reply-kx",
         "public_modulus": public_modulus,
         "public_base": public_base,
         "encrypted_key": encrypted_key
@@ -84,14 +85,20 @@ def caesar_encrypt():
 
     print(data)
     # private_key * cipher_key
-    key = (private_key * data[4]) % 26
+    key = (private_key * data["encrypted_key"]) % 26
     
     new_key = shift_alphabet(alphabet, key)
     print(new_key)
 
     encrypted_text = encrypt_caesar(my_message, new_key)
 
-    result = (dest_address, "caesar-encrypt", encrypted_text)
+    result = {
+        "from": get_url(self_client_host, self_client_port), 
+        "to": get_url(dest_client_host, dest_client_port), 
+        "command": caesar-encrypt", 
+        "encrypted_text": encrypted_text
+    }
+    
     print("Sending encrypted text: {}.....".format(encrypted_text))
     return pickle.dumps(result)
 
@@ -103,7 +110,7 @@ def caesar_decrypt():
     # read encrypted text
     with open(encryption_file_name, 'rb') as encrypt_file_obj:
         data = pickle.load(encrypt_file_obj)
-        encrypted_text = data[2]
+        encrypted_text = data["encrypted_text"]
     
     # form new_key
 
@@ -116,7 +123,7 @@ def caesar_decrypt():
 
 
     # private_key * encrypted_key
-    key = -(private_key * new_key[4]) % 26
+    key = -(private_key * new_key["encrypted_key"]) % 26
     
     new_key = shift_alphabet(alphabet, key)
     print(new_key)

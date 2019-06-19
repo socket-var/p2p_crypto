@@ -22,7 +22,7 @@ def receiver(server_stream, data):
     if dest_address == "{}:{}".format(self_client_host, self_client_port):
 
         if (command == "start-kx" or command == "reply-kx"):
-            filename = owner_key_file_name
+            filename = receiver_key_file_name
         elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
             filename = encryption_file_name
         elif command == "caesar-decrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
