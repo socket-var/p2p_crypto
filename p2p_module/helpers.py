@@ -36,10 +36,9 @@ def reply_kx():
     with open(receiver_key_file_name, 'rb') as pickle_file:
         data = pickle.load(pickle_file)
     
-    public_modulus, public_base = data[2], data[3]
+    dest_address, public_modulus, public_base = data[0], data[2], data[3]
 
     private_key = int(input("Enter private key for Diffie-Hellman: "))
-    dest_address = input("Enter the destination address (Eg: 'localhost:5000'): ")
 
 
     # destination client to receive the secret
