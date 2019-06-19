@@ -7,35 +7,7 @@ import pickle
 
 load_dotenv()
 
-server_host = os.getenv(
-    "SELF_SERVER_ADDRESS")
-
-server_port = int(os.getenv(
-    "SELF_SERVER_PORT"))
-
-self_client_host = os.getenv(
-    "SELF_CLIENT_ADDRESS")
-
-self_client_port = int(os.getenv(
-    "SELF_CLIENT_PORT"))
-
-
-owner_key_file_name = os.getenv(
-    "OWNER_KEY_FILE_NAME")
-
-receiver_key_file_name = os.getenv(
-    "RECEIVER_KEY_FILE_NAME")
-
-
-encryption_file_name = os.getenv(
-    "ENCRYPTION_FILE_NAME"
-)
-
-decryption_file_name = os.getenv(
-    "DECRYPTION_FILE_NAME"
-)
-
-BUFSIZE = 16384
+from p2p_module.config import self_server_host, self_server_port, self_client_host, self_client_port, owner_key_file_name, receiver_key_file_name, encryption_file_name, decryption_file_name, buffer_size
 
 CONNECTION_COUNTER = count()
 
@@ -47,10 +19,7 @@ def receiver(server_stream, data):
     
     filename = ""
 
-    if command == "start-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
-        filename = receiver_key_file_name
-        
-    elif command == "reply-kx" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+    if (command == "start-kx" or command == "reply-kx") and dest_address == "{}:{}".format(self_client_host, self_client_port):
         filename = owner_key_file_name
     elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
         print("dumping caesar encrypted text")
@@ -69,7 +38,7 @@ async def p2p_server(server_stream):
     print("Server {}: started".format(ident))
     try:
         while True:
-            data = await server_stream.receive_some(BUFSIZE)
+            data = await server_stream.receive_some(buffer_size)
             print("Server {}: received data {!r}".format(ident, data))
             
             receiver(server_stream, data)
@@ -90,7 +59,7 @@ async def p2p_server(server_stream):
 
 
 async def main():
-    await trio.serve_tcp(p2p_server, server_port)
+    await trio.serve_tcp(p2p_server, self_server_port)
 
 
 # We could also just write 'trio.run(serve_tcp, echo_server, PORT)', but real
