@@ -13,7 +13,7 @@ CONNECTION_COUNTER = count()
 
 def receiver(server_stream, data):
     data = pickle.loads(data)
-    dest_address, command = data[0], data[1]
+    dest_address, command = data["to"], data["command"]
 
     print(dest_address, "{}:{}".format(self_client_host, self_client_port), command)
     

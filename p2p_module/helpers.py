@@ -1,8 +1,11 @@
 import os
 import pickle
 # TODO: make this reusable
-from p2p_module.config import dest_server_host, dest_server_port, dest_client_host, dest_client_port, self_client_host, self_client_port, owner_key_file_name, receiver_key_file_name, decryption_file_name
+from p2p_module.config import dest_server_host, dest_server_port, dest_client_host, dest_client_port, self_client_host, self_client_port, owner_key_file_name, receiver_key_file_name, encryption_file_name, decryption_file_name
 from p2p_module.crypto_utils import *
+
+def get_url(host, port):
+    return "{}:{}".format(host, port)
 
 def start_kx():
 
@@ -21,8 +24,16 @@ def start_kx():
         )
     )
 
-    data = (dest_address, "start-kx",
-            public_modulus, public_base, encrypted_key)
+    # data = (dest_address, "start-kx",
+    #         public_modulus, public_base, encrypted_key)
+    data = {
+        "from_address": get_url(self_client_host, self_client_port),
+        "to_address": get_url(dest_client_host, dest_client_port),
+        "command": "start-kx",
+        "public_modulus": public_modulus,
+        "public_base": public_base,
+        "encrypted_key": encrypted_key
+    }
 
     with open(owner_key_file_name, "wb") as write_obj:
         pickle.dump(data, write_obj)
@@ -32,13 +43,14 @@ def start_kx():
 
 def reply_kx():
     
-    data = ()
+    data = {}
     with open(receiver_key_file_name, 'rb') as pickle_file:
         data = pickle.load(pickle_file)
     
-    public_modulus, public_base = data[2], data[3]
+    public_modulus, public_base = data["public_modulus"], data["public_base"]
     
-    dest_address = input("Enter the destination address (Eg: 'localhost:5000'): ")
+    dest_address = data["from"]
+    src_address = data["to"]
 
     private_key = int(input("Enter private key for Diffie-Hellman: "))
 
@@ -52,8 +64,13 @@ def reply_kx():
         )
     )
 
-    data = (dest_address, "reply-kx",
-            public_modulus, public_base, encrypted_key)
+    data = {
+        "from": src_address,
+        "to": dest_address,
+        "public_modulus": public_modulus,
+        "public_base": public_base,
+        "encrypted_key": encrypted_key
+    }
 
     return pickle.dumps(data)
 
@@ -83,12 +100,11 @@ def caesar_encrypt():
 
 def caesar_decrypt():
     private_key = int(input("Enter your private key:"))
-    filename = input("Enter the file name containing encrypted text: ")
     key_filename = input("Enter the file name containing encrypted key: ")
 
     encrypted_text = ""
     # read encrypted text
-    with open(filename, 'rb') as encrypt_file_obj:
+    with open(encryption_file_name, 'rb') as encrypt_file_obj:
         data = pickle.load(encrypt_file_obj)
         encrypted_text = data[2]
     

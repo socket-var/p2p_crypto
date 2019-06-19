@@ -1,14 +1,12 @@
 alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-# TODO: remove defaults
-def diffie_hellman(private_key, public_modulus=23, public_base=5):
+
+def diffie_hellman(private_key, public_modulus, public_base):
 
     encrypted_key = public_base ** int(private_key) % public_modulus
 
     return encrypted_key
 
-
-# TODO: encrypt decrypt
 
 def shift_alphabet(alphabet, key):
     new_alphabet = ""
