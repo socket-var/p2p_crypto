@@ -1,7 +1,5 @@
-receiver_key.pickle
-my_key.pickle
-encryption_result.pickle
-decryption_result.pickle
+*.pickle
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
