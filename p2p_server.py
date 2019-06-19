@@ -13,22 +13,26 @@ CONNECTION_COUNTER = count()
 
 def receiver(server_stream, data):
     data = pickle.loads(data)
-    dest_address, command = data["to"], data["command"]
+    dest_address, command = data["to_address"], data["command"]
 
     print(dest_address, "{}:{}".format(self_client_host, self_client_port), command)
     
     filename = ""
 
-    if (command == "start-kx" or command == "reply-kx") and dest_address == "{}:{}".format(self_client_host, self_client_port):
-        filename = owner_key_file_name
-    elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
-        print("dumping caesar encrypted text")
-        filename = encryption_file_name
-    elif command == "caesar-decrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
-        filename = decryption_file_name
+    if dest_address == "{}:{}".format(self_client_host, self_client_port):
+
+        if (command == "start-kx" or command == "reply-kx"):
+            filename = owner_key_file_name
+        elif command == "caesar-encrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+            filename = encryption_file_name
+        elif command == "caesar-decrypt" and dest_address == "{}:{}".format(self_client_host, self_client_port):
+            filename = decryption_file_name
+        
+        with open(filename, 'wb') as pickle_file:
+            pickle.dump(data, pickle_file)
     
-    with open(filename, 'wb') as pickle_file:
-        pickle.dump(data, pickle_file)
+    else:
+        print("Whoops, you choose the wrong recepient")
 
 
 async def p2p_server(server_stream):

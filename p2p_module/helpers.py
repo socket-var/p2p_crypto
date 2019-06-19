@@ -49,8 +49,8 @@ def reply_kx():
     
     public_modulus, public_base = data["public_modulus"], data["public_base"]
     
-    dest_address = data["from"]
-    src_address = data["to"]
+    dest_address = data["from_address"]
+    src_address = data["to_address"]
 
     private_key = int(input("Enter private key for Diffie-Hellman: "))
 
@@ -65,8 +65,8 @@ def reply_kx():
     )
 
     data = {
-        "from": src_address,
-        "to": dest_address,
+        "from_address": src_address,
+        "to_address": dest_address,
         "public_modulus": public_modulus,
         "public_base": public_base,
         "encrypted_key": encrypted_key
